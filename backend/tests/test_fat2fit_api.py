@@ -7,8 +7,19 @@ import requests
 import os
 import uuid
 from datetime import datetime
+from pathlib import Path
 
-BASE_URL = os.environ['EXPO_PUBLIC_BACKEND_URL'].rstrip('/')
+# Load backend URL from frontend .env file
+def load_backend_url():
+    frontend_env = Path(__file__).parent.parent.parent / 'frontend' / '.env'
+    if frontend_env.exists():
+        with open(frontend_env) as f:
+            for line in f:
+                if line.startswith('EXPO_PUBLIC_BACKEND_URL='):
+                    return line.split('=', 1)[1].strip().rstrip('/')
+    return 'https://fitness-calc-hub-2.preview.emergentagent.com'
+
+BASE_URL = load_backend_url()
 
 class TestAuth:
     """Authentication flow tests"""
