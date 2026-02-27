@@ -1,0 +1,164 @@
+{
+  "identity": {
+    "persona": "E1: The Anti-AI Designer",
+    "mission": "Create a high-performance, dark-mode fitness app that feels like a tactical tool, not a generic template.",
+    "principles": [
+      "Fusion over Imitation: Mix tactical gear aesthetics with high-end sports data visualization.",
+      "Emotion First: Every interaction should feel 'heavy' and 'deliberate', like lifting weights.",
+      "Content is King: Data (reps, weight, macros) must be legible at a glance in a dark gym.",
+      "Zoom In: Focus on the numbers. Big typography for timers and rep counters.",
+      "Negative Space: Don't clutter. Use deep black space to let the data breathe."
+    ]
+  },
+  "brand": {
+    "name": "Fat2FitXpress",
+    "tone": "Motivational, Intense, Disciplined, 'Express'",
+    "colors": {
+      "palette": {
+        "primary": "#FF3B30",
+        "primary_foreground": "#FFFFFF",
+        "secondary": "#007AFF",
+        "background": "#0A0A0A",
+        "surface": "#1C1C1E",
+        "surface_highlight": "#2C2C2E",
+        "text_primary": "#FFFFFF",
+        "text_secondary": "#AEAEB2",
+        "text_muted": "#636366",
+        "success": "#32D74B",
+        "warning": "#FFD60A",
+        "error": "#FF453A",
+        "border": "#3A3A3C"
+      },
+      "usage": {
+        "background": "Use #0A0A0A for the main app background. No gradients.",
+        "cards": "Use #1C1C1E for workout cards and list items. Add a subtle border #3A3A3C.",
+        "primary_action": "Use #FF3B30 (Electric Red) for 'Start Workout', 'Log Set', and primary CTAs.",
+        "secondary_action": "Use #007AFF (Volt Blue) for Water Tracker and Information.",
+        "text": "Headings in #FFFFFF. Metadata (time, date) in #AEAEB2."
+      }
+    },
+    "typography": {
+      "headings": {
+        "family": "Barlow Condensed, Oswald, or System Bold",
+        "weight": "700",
+        "style": "Uppercase, Tight Tracking",
+        "usage": "Screen titles, Section headers, Big Data metrics"
+      },
+      "body": {
+        "family": "Inter, Roboto, or System Default",
+        "weight": "400",
+        "usage": "Instructions, descriptions, list text"
+      },
+      "monospace": {
+        "family": "JetBrains Mono, Menlop, or System Monospace",
+        "usage": "Timers, Intervals, Code-like stats"
+      }
+    }
+  },
+  "ui_components": {
+    "framework": "React Native (Expo)",
+    "styling": "Tailwind CSS (NativeWind) or StyleSheet.create",
+    "primitives": {
+      "container": "View (equivalent to div)",
+      "text": "Text (equivalent to span/p/h1)",
+      "touchable": "TouchableOpacity or Pressable (equivalent to button)",
+      "list": "FlatList or SectionList (for performance)",
+      "image": "Image (Expo Image for caching)",
+      "safe_area": "SafeAreaView (Critical for notches)"
+    },
+    "rules": [
+      "DO NOT use HTML tags (div, span, h1, img). Use React Native primitives only.",
+      "DO NOT use '100vh' or '100vw'. Use 'flex: 1' or Dimensions API.",
+      "Use 'gap' property in flex containers for spacing (supported in newer RN).",
+      "Ensure minimum touch target size (44x44) for all buttons."
+    ]
+  },
+  "layout_strategies": {
+    "spacing": {
+      "base": 4,
+      "scale": [4, 8, 12, 16, 24, 32, 48, 64],
+      "container_padding": 16,
+      "card_padding": 16
+    },
+    "grids": {
+      "dashboard": "Bento Grid Style using Flexbox with wrap. Mix 100% width cards with 50% width stats.",
+      "calculators": "Vertical Scrollable List. Each calculator is a full-width card.",
+      "workout_log": "Dense Table-like rows using FlexRow. Input fields for Set/Rep/Weight."
+    }
+  },
+  "assets": {
+    "images": {
+      "hero_backgrounds": [
+        "https://images.unsplash.com/photo-1700784795176-7ff886439d79?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwxfHx3b3Jrb3V0JTIwbXVzY3VsYXIlMjBtYW4lMjBneW0lMjBkYXJrJTIwbGlnaHRpbmd8ZW58MHx8fHwxNzcyMjEwMjQ5fDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1669502299593-5dbb23edfdb4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwxfHx3b3Jrb3V0JTIwZml0JTIwd29tYW4lMjBneW0lMjBkYXJrJTIwbGlnaHRpbmd8ZW58MHx8fHwxNzcyMjEwMjUwfDA&ixlib=rb-4.1.0&q=85"
+      ],
+      "nutrition": [
+        "https://images.unsplash.com/photo-1666694890835-ed9a5068b413?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwzfHxoZWFsdGh5JTIwZm9vZCUyMG1lYWwlMjBwcmVwJTIwYmxhY2slMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3MjIxMDI1MHww&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1714423240476-b07bbb2cc37c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwZm9vZCUyMG1lYWwlMjBwcmVwJTIwYmxhY2slMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3MjIxMDI1MHww&ixlib=rb-4.1.0&q=85"
+      ],
+      "water_tracker": [
+        "https://images.unsplash.com/photo-1616118132534-381148898bb4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHw0fHxneW0lMjB3YXRlciUyMGJvdHRsZSUyMHByb3RlaW4lMjBzaGFrZXxlbnwwfHx8fDE3NzIyMTAyNTF8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1686602397438-f5939d61f10c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwzfHxneW0lMjB3YXRlciUyMGJvdHRsZSUyMHByb3RlaW4lMjBzaGFrZXxlbnwwfHx8fDE3NzIyMTAyNTF8MA&ixlib=rb-4.1.0&q=85"
+      ],
+      "devices": [
+        "https://images.unsplash.com/photo-1665860455418-017fa50d29bc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwxfHxmaXRuZXNzJTIwdHJhY2tlciUyMHNtYXJ0JTIwd2F0Y2h8ZW58MHx8fHwxNzcyMjEwMjUxfDA&ixlib=rb-4.1.0&q=85"
+      ]
+    },
+    "icons": {
+      "library": "Lucide React Native or Ionicons",
+      "style": "Stroke width 2, Rounded corners",
+      "active_color": "#FF3B30",
+      "inactive_color": "#636366"
+    }
+  },
+  "feature_guidelines": {
+    "auth": {
+      "style": "Minimalist input fields with floating labels. Strong 'Login' button.",
+      "security": "Use SecureStore for tokens. Do not store passwords in plain text."
+    },
+    "dashboard": {
+      "widgets": [
+        "Daily Calorie Goal (Circular Progress)",
+        "Workouts This Week (Bar Chart)",
+        "Water Intake (Blue Liquid Fill Animation)",
+        "Quick Log Button (Floating Action Button - FAB)"
+      ]
+    },
+    "calculators": {
+      "layout": "Input Form with Slider or Numeric Input. Result card pops up with animation.",
+      "types": ["TDEE", "BMI", "Body Fat %", "Macros", "One Rep Max", "Ideal Weight"]
+    },
+    "workout_logging": {
+      "ux": "Focus on speed. Auto-fill previous weights. Large +/- buttons for reps.",
+      "visuals": "Table rows with 'Set', 'Kg', 'Reps'. Swipe to delete set."
+    },
+    "progress_photos": {
+      "layout": "Side-by-side comparison slider. Grid view of dates.",
+      "privacy": "Blur sensitive previews by default (optional setting)."
+    }
+  },
+  "universal_guidelines": {
+    "anti_slop": [
+      "No generic gradients.",
+      "No default shadows (use sharp custom shadows or glow).",
+      "No centered text on long paragraphs."
+    ],
+    "interaction": [
+      "Use 'Pressable' with 'style={({pressed}) => opacity: pressed ? 0.7 : 1}' for feedback.",
+      "Use 'LayoutAnimation' for list additions/removals.",
+      "KeyboardAvoidView is MANDATORY for all forms."
+    ],
+    "accessibility": {
+      "dark_mode": "Ensure contrast ratio > 4.5:1 for text.",
+      "touch_targets": "Min 44px height for inputs and buttons."
+    }
+  },
+  "instructions_to_main_agent": [
+    "You are building a React Native Expo app (TypeScript).",
+    "Use 'app/(tabs)' for the main navigation structure.",
+    "Use 'app/auth' for login/signup screens.",
+    "Use 'components/ui' for reusable atoms (Button, Input, Card).",
+    "Follow the 'Dark Mode Fitness' aesthetic strictly.",
+    "Use the provided image URLs for placeholders."
+  ]
+}
