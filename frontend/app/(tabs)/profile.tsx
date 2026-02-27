@@ -142,6 +142,22 @@ export default function ProfileScreen() {
             )}
           </View>
 
+          {/* Update My Plan CTA */}
+          <TouchableOpacity
+            testID="update-plan-btn"
+            style={s.updatePlanCard}
+            onPress={() => router.push('/onboarding?mode=update')}
+          >
+            <View style={s.updatePlanIcon}>
+              <Ionicons name="refresh" size={24} color={COLORS.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.updatePlanTitle}>Update My Plan</Text>
+              <Text style={s.updatePlanDesc}>Change your goal, stats, or get a new personalized plan</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+          </TouchableOpacity>
+
           <TouchableOpacity testID="logout-btn" style={s.logoutBtn} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
             <Text style={s.logoutText}>Logout</Text>
@@ -225,5 +241,16 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: COLORS.error + '40',
   },
   logoutText: { color: COLORS.error, fontSize: 15, fontWeight: '700' },
+  updatePlanCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: COLORS.surface, borderRadius: 16, padding: 16, marginBottom: 16,
+    borderWidth: 1, borderColor: COLORS.primary + '40',
+  },
+  updatePlanIcon: {
+    width: 48, height: 48, borderRadius: 14, backgroundColor: COLORS.primary + '15',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  updatePlanTitle: { fontSize: 16, fontWeight: '800', color: COLORS.textPrimary },
+  updatePlanDesc: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   version: { textAlign: 'center', color: COLORS.textMuted, fontSize: 12, marginTop: 24 },
 });
