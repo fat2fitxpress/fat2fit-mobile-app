@@ -3,7 +3,7 @@ import { useAuth } from '../src/context/AuthContext';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
 export default function Index() {
-  const { user, loading } = useAuth();
+  const { user, loading, profileComplete } = useAuth();
 
   if (loading) {
     return (
@@ -13,8 +13,12 @@ export default function Index() {
     );
   }
 
-  if (user) {
+  if (user && profileComplete) {
     return <Redirect href="/(tabs)" />;
+  }
+
+  if (user && !profileComplete) {
+    return <Redirect href="/onboarding" />;
   }
 
   return <Redirect href="/auth/login" />;

@@ -14,9 +14,15 @@ export interface User {
   created_at: string;
 }
 
+export function isProfileComplete(u: User | null): boolean {
+  if (!u) return false;
+  return !!(u.age && u.height_cm && u.weight_kg && u.gender && u.goal);
+}
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  profileComplete: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -77,8 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }
 
+  const profileComplete = isProfileComplete(user);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, profileComplete, login, signup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
