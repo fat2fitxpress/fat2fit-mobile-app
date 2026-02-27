@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, ScrollView
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, ScrollView, Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -38,10 +38,11 @@ export default function LoginScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.logoArea}>
-            <View style={styles.logoCircle}>
-              <Ionicons name="fitness" size={48} color={COLORS.primary} />
-            </View>
-            <Text style={styles.brand}>FAT2FIT</Text>
+            <Image
+              source={require('../../assets/images/f2f_logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <Text style={styles.brandSub}>XPRESS</Text>
             <Text style={styles.tagline}>Your Express Journey to Fitness</Text>
           </View>
@@ -102,13 +103,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   logoArea: { alignItems: 'center', marginBottom: 48 },
-  logoCircle: {
-    width: 88, height: 88, borderRadius: 44,
-    backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: COLORS.primary, marginBottom: 16,
-  },
-  brand: { fontSize: 36, fontWeight: '900', color: COLORS.textPrimary, letterSpacing: 4 },
-  brandSub: { fontSize: 18, fontWeight: '700', color: COLORS.primary, letterSpacing: 8, marginTop: -4 },
+  logoImage: { width: 220, height: 80, marginBottom: 8 },
+  brandSub: { fontSize: 18, fontWeight: '700', color: COLORS.primary, letterSpacing: 8, marginTop: 0 },
   tagline: { fontSize: 13, color: COLORS.textSecondary, marginTop: 8 },
   form: { gap: 16 },
   inputRow: {

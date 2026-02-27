@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, ScrollView
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, ScrollView, Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -46,8 +46,17 @@ export default function SignupScreen() {
             <TouchableOpacity onPress={() => router.back()} testID="signup-back-btn" style={styles.backBtn}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.title}>CREATE ACCOUNT</Text>
-            <Text style={styles.subtitle}>Start your fitness journey today</Text>
+            <View style={styles.signupLogoRow}>
+              <Image
+                source={require('../../assets/images/f2f_icon.png')}
+                style={styles.signupLogo}
+                resizeMode="contain"
+              />
+              <View>
+                <Text style={styles.title}>CREATE ACCOUNT</Text>
+                <Text style={styles.subtitle}>Start your fitness journey today</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.form}>
@@ -118,7 +127,9 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   header: { marginBottom: 40 },
-  backBtn: { marginBottom: 24 },
+  backBtn: { marginBottom: 16 },
+  signupLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  signupLogo: { width: 48, height: 48 },
   title: { fontSize: 28, fontWeight: '900', color: COLORS.textPrimary, letterSpacing: 2 },
   subtitle: { fontSize: 14, color: COLORS.textSecondary, marginTop: 4 },
   form: { gap: 16 },
