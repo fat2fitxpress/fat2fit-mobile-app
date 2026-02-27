@@ -30,7 +30,7 @@ export default function SignupScreen() {
     setLoading(true);
     try {
       await signup(name.trim(), email.trim().toLowerCase(), password);
-      router.replace('/(tabs)');
+      router.replace('/onboarding');
     } catch (err: any) {
       Alert.alert('Signup Failed', err.message || 'Something went wrong');
     } finally {
