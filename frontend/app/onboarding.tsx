@@ -4,7 +4,7 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../src/utils/theme';
 import { apiCall } from '../src/utils/api';
@@ -23,18 +23,22 @@ const GOALS = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const isUpdate = params.mode === 'update';
   const { user, refreshUser } = useAuth();
+
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [units, setUnits] = useState<UnitSystem>('metric');
 
-  const [gender, setGender] = useState<string>('');
-  const [age, setAge] = useState('');
-  const [weight, setWeight] = useState('');
-  const [heightCm, setHeightCm] = useState('');
+  // Pre-fill from user profile when updating
+  const [gender, setGender] = useState<string>(isUpdate && user?.gender ? user.gender : '');
+  const [age, setAge] = useState(isUpdate && user?.age ? String(user.age) : '');
+  const [weight, setWeight] = useState(isUpdate && user?.weight_kg ? String(user.weight_kg) : '');
+  const [heightCm, setHeightCm] = useState(isUpdate && user?.height_cm ? String(user.height_cm) : '');
   const [heightFt, setHeightFt] = useState('');
   const [heightIn, setHeightIn] = useState('');
-  const [goal, setGoal] = useState('');
+  const [goal, setGoal] = useState(isUpdate && user?.goal ? user.goal : '');
 
   const getWeightKg = () => units === 'imperial' ? (parseFloat(weight) || 0) / LB_PER_KG : (parseFloat(weight) || 0);
   const getHeightCm = () => units === 'imperial'
@@ -133,6 +137,11 @@ export default function OnboardingScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         {/* Progress bar */}
         <View style={s.progressWrap}>
+          {isUpdate && (
+            <TouchableOpacity testID="onboard-close-btn" style={s.closeBtn} onPress={() => router.back()}>
+              <Ionicons name="close" size={22} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+          )}
           <View style={s.progressBar}>
             <View style={[s.progressFill, { width: `${progress}%` }]} />
           </View>
@@ -293,7 +302,7 @@ export default function OnboardingScreen() {
                   style={s.resultLogo}
                   resizeMode="contain"
                 />
-                <Text style={s.stepTitle}>Your Personalized Plan</Text>
+                <Text style={s.stepTitle}>{isUpdate ? 'Your Updated Plan' : 'Your Personalized Plan'}</Text>
                 <Text style={s.stepSubtitle}>Here's what we've calculated for you, {user?.name?.split(' ')[0]}</Text>
               </View>
 
@@ -398,6 +407,7 @@ const s = StyleSheet.create({
   content: { padding: 20, paddingBottom: 24 },
   // Progress
   progressWrap: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4 },
+  closeBtn: { alignSelf: 'flex-end', padding: 4, marginBottom: 4 },
   progressBar: { height: 4, backgroundColor: COLORS.surfaceHighlight, borderRadius: 2, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 2 },
   stepText: { fontSize: 10, fontWeight: '800', color: COLORS.textMuted, letterSpacing: 2, marginTop: 8 },
