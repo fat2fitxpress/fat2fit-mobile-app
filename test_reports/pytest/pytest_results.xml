@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.165" timestamp="2026-02-27T16:55:59.921537+00:00" hostname="agent-env-d5c805fd-dc7c-4539-926f-093f7d09dd82"><testcase classname="" name="tests.test_fat2fit_api" time="0.000"><error message="collection failure">tests/test_fat2fit_api.py:11: in &lt;module&gt;
+    BASE_URL = os.environ['EXPO_PUBLIC_BACKEND_URL'].rstrip('/')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen os&gt;:679: in __getitem__
+    ???
+E   KeyError: 'EXPO_PUBLIC_BACKEND_URL'</error></testcase></testsuite></testsuites>
