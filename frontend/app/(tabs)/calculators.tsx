@@ -8,6 +8,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../src/utils/theme';
 
 type CalcType = 'tdee' | 'bmi' | 'bodyfat' | 'macros' | '1rm' | 'ideal';
+type UnitSystem = 'metric' | 'imperial';
+
+const LB_PER_KG = 2.20462;
+const CM_PER_IN = 2.54;
+const IN_PER_FT = 12;
 
 const CALCS: { id: CalcType; name: string; icon: string; color: string; desc: string }[] = [
   { id: 'tdee', name: 'TDEE', icon: 'flame', color: '#1976D2', desc: 'Total Daily Energy Expenditure' },
@@ -28,6 +33,11 @@ const ACTIVITY_LEVELS = [
 
 const GOALS = ['Weight Loss', 'Maintenance', 'Muscle Gain'];
 
+function toKg(val: number, unit: UnitSystem) { return unit === 'imperial' ? val / LB_PER_KG : val; }
+function toCm(ft: number, inches: number) { return (ft * IN_PER_FT + inches) * CM_PER_IN; }
+function kgToLb(kg: number) { return kg * LB_PER_KG; }
+function cmToFtIn(cm: number) { const totalIn = cm / CM_PER_IN; return { ft: Math.floor(totalIn / 12), inches: Math.round(totalIn % 12) }; }
+
 export default function CalculatorsScreen() {
   const [selected, setSelected] = useState<CalcType | null>(null);
   const [inputs, setInputs] = useState<Record<string, string>>({});
@@ -35,26 +45,33 @@ export default function CalculatorsScreen() {
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [actIdx, setActIdx] = useState(2);
   const [goalIdx, setGoalIdx] = useState(0);
+  const [units, setUnits] = useState<UnitSystem>('metric');
 
   const setInput = (key: string, val: string) => setInputs(p => ({ ...p, [key]: val }));
   const num = (key: string) => parseFloat(inputs[key] || '0') || 0;
 
   const reset = () => { setInputs({}); setResult(null); };
 
+  // Get weight in kg regardless of unit system
+  const getWeightKg = () => toKg(num('weight'), units);
+  // Get height in cm regardless of unit system
+  const getHeightCm = () => units === 'imperial' ? toCm(num('heightFt'), num('heightIn')) : num('height');
+
+  const fmtWeight = (kg: number) => units === 'imperial' ? `${Math.round(kgToLb(kg))} lbs` : `${kg.toFixed(1)} kg`;
+  const fmtWeightShort = (kg: number) => units === 'imperial' ? `${Math.round(kgToLb(kg))}lbs` : `${Math.round(kg)}kg`;
+
   const calculate = () => {
     switch (selected) {
       case 'tdee': {
-        const w = num('weight'), h = num('height'), a = num('age');
+        const w = getWeightKg(), h = getHeightCm(), a = num('age');
         if (!w || !h || !a) return;
-        const bmr = gender === 'male'
-          ? 10 * w + 6.25 * h - 5 * a + 5
-          : 10 * w + 6.25 * h - 5 * a - 161;
+        const bmr = gender === 'male' ? 10 * w + 6.25 * h - 5 * a + 5 : 10 * w + 6.25 * h - 5 * a - 161;
         const tdee = bmr * ACTIVITY_LEVELS[actIdx].factor;
         setResult({ bmr: Math.round(bmr), tdee: Math.round(tdee), deficit: Math.round(tdee - 500), surplus: Math.round(tdee + 300) });
         break;
       }
       case 'bmi': {
-        const w = num('weight'), h = num('height');
+        const w = getWeightKg(), h = getHeightCm();
         if (!w || !h) return;
         const hm = h / 100;
         const bmi = w / (hm * hm);
@@ -66,32 +83,24 @@ export default function CalculatorsScreen() {
         break;
       }
       case 'bodyfat': {
-        const w = num('weight'), h = num('height'), a = num('age');
+        const w = getWeightKg(), h = getHeightCm(), a = num('age');
         if (!w || !h || !a) return;
         const hm = h / 100;
         const bmi = w / (hm * hm);
-        const bf = gender === 'male'
-          ? 1.20 * bmi + 0.23 * a - 16.2
-          : 1.20 * bmi + 0.23 * a - 5.4;
+        const bf = gender === 'male' ? 1.20 * bmi + 0.23 * a - 16.2 : 1.20 * bmi + 0.23 * a - 5.4;
         let cat = 'Average';
         if (gender === 'male') {
-          if (bf < 6) cat = 'Essential';
-          else if (bf < 14) cat = 'Athletic';
-          else if (bf < 18) cat = 'Fitness';
-          else if (bf < 25) cat = 'Average';
-          else cat = 'Above Average';
+          if (bf < 6) cat = 'Essential'; else if (bf < 14) cat = 'Athletic';
+          else if (bf < 18) cat = 'Fitness'; else if (bf < 25) cat = 'Average'; else cat = 'Above Average';
         } else {
-          if (bf < 14) cat = 'Essential';
-          else if (bf < 21) cat = 'Athletic';
-          else if (bf < 25) cat = 'Fitness';
-          else if (bf < 32) cat = 'Average';
-          else cat = 'Above Average';
+          if (bf < 14) cat = 'Essential'; else if (bf < 21) cat = 'Athletic';
+          else if (bf < 25) cat = 'Fitness'; else if (bf < 32) cat = 'Average'; else cat = 'Above Average';
         }
         setResult({ bodyfat: bf.toFixed(1), category: cat });
         break;
       }
       case 'macros': {
-        const w = num('weight');
+        const w = getWeightKg();
         if (!w) return;
         const goal = GOALS[goalIdx];
         let cals: number, pRatio: number, fRatio: number;
@@ -105,22 +114,108 @@ export default function CalculatorsScreen() {
         break;
       }
       case '1rm': {
-        const w = num('weight'), r = num('reps');
+        const w = getWeightKg(), r = num('reps');
         if (!w || !r) return;
         const orm = w * (1 + r / 30);
-        setResult({ oneRepMax: Math.round(orm), pct90: Math.round(orm * 0.9), pct80: Math.round(orm * 0.8), pct70: Math.round(orm * 0.7) });
+        setResult({ oneRepMaxKg: orm, pct90Kg: orm * 0.9, pct80Kg: orm * 0.8, pct70Kg: orm * 0.7 });
         break;
       }
       case 'ideal': {
-        const h = num('height');
+        const h = getHeightCm();
         if (!h) return;
-        const inches = h / 2.54;
+        const inches = h / CM_PER_IN;
         const over60 = Math.max(inches - 60, 0);
-        const ideal = gender === 'male' ? 50 + 2.3 * over60 : 45.5 + 2.3 * over60;
-        setResult({ ideal: ideal.toFixed(1), rangeLow: (ideal * 0.9).toFixed(1), rangeHigh: (ideal * 1.1).toFixed(1) });
+        const idealKg = gender === 'male' ? 50 + 2.3 * over60 : 45.5 + 2.3 * over60;
+        setResult({ idealKg, rangeLowKg: idealKg * 0.9, rangeHighKg: idealKg * 1.1 });
         break;
       }
     }
+  };
+
+  // --- Render helpers ---
+
+  const renderUnitToggle = () => (
+    <View style={s.unitToggleWrap}>
+      <Text style={s.unitLabel}>UNITS</Text>
+      <View style={s.unitToggleRow}>
+        {(['metric', 'imperial'] as UnitSystem[]).map(u => (
+          <TouchableOpacity
+            key={u} testID={`unit-${u}-btn`}
+            style={[s.unitBtn, units === u && s.unitBtnActive]}
+            onPress={() => { setUnits(u); setInputs({}); setResult(null); }}
+          >
+            <Text style={[s.unitBtnText, units === u && s.unitBtnTextActive]}>
+              {u === 'metric' ? 'METRIC (kg/cm)' : 'IMPERIAL (lb/ft)'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderWeightInput = (label: string = 'Weight') => (
+    <View style={s.inputGroup}>
+      <Text style={s.inputLabel}>{label} ({units === 'metric' ? 'kg' : 'lbs'})</Text>
+      <TextInput
+        testID="calc-input-weight"
+        style={s.textInput}
+        value={inputs['weight'] || ''}
+        onChangeText={v => setInput('weight', v)}
+        keyboardType="numeric"
+        placeholderTextColor={COLORS.textMuted}
+        placeholder={units === 'metric' ? 'e.g. 75' : 'e.g. 165'}
+      />
+    </View>
+  );
+
+  const renderHeightInput = () => {
+    if (units === 'metric') {
+      return (
+        <View style={s.inputGroup}>
+          <Text style={s.inputLabel}>Height (cm)</Text>
+          <TextInput
+            testID="calc-input-height"
+            style={s.textInput}
+            value={inputs['height'] || ''}
+            onChangeText={v => setInput('height', v)}
+            keyboardType="numeric"
+            placeholderTextColor={COLORS.textMuted}
+            placeholder="e.g. 175"
+          />
+        </View>
+      );
+    }
+    return (
+      <View style={s.inputGroup}>
+        <Text style={s.inputLabel}>Height (ft / in)</Text>
+        <View style={s.heightRow}>
+          <View style={s.heightField}>
+            <TextInput
+              testID="calc-input-heightFt"
+              style={s.textInput}
+              value={inputs['heightFt'] || ''}
+              onChangeText={v => setInput('heightFt', v)}
+              keyboardType="numeric"
+              placeholderTextColor={COLORS.textMuted}
+              placeholder="5"
+            />
+            <Text style={s.heightUnit}>ft</Text>
+          </View>
+          <View style={s.heightField}>
+            <TextInput
+              testID="calc-input-heightIn"
+              style={s.textInput}
+              value={inputs['heightIn'] || ''}
+              onChangeText={v => setInput('heightIn', v)}
+              keyboardType="numeric"
+              placeholderTextColor={COLORS.textMuted}
+              placeholder="10"
+            />
+            <Text style={s.heightUnit}>in</Text>
+          </View>
+        </View>
+      </View>
+    );
   };
 
   const renderInput = (label: string, key: string, unit: string = '') => (
@@ -191,12 +286,12 @@ export default function CalculatorsScreen() {
 
   const renderForm = () => {
     switch (selected) {
-      case 'tdee': return <>{renderGenderPicker()}{renderInput('Age', 'age', 'years')}{renderInput('Weight', 'weight', 'kg')}{renderInput('Height', 'height', 'cm')}{renderActivityPicker()}</>;
-      case 'bmi': return <>{renderInput('Weight', 'weight', 'kg')}{renderInput('Height', 'height', 'cm')}</>;
-      case 'bodyfat': return <>{renderGenderPicker()}{renderInput('Age', 'age', 'years')}{renderInput('Weight', 'weight', 'kg')}{renderInput('Height', 'height', 'cm')}</>;
-      case 'macros': return <>{renderInput('Weight', 'weight', 'kg')}{renderGoalPicker()}</>;
-      case '1rm': return <>{renderInput('Weight Lifted', 'weight', 'kg')}{renderInput('Reps Completed', 'reps')}</>;
-      case 'ideal': return <>{renderGenderPicker()}{renderInput('Height', 'height', 'cm')}</>;
+      case 'tdee': return <>{renderUnitToggle()}{renderGenderPicker()}{renderInput('Age', 'age', 'years')}{renderWeightInput()}{renderHeightInput()}{renderActivityPicker()}</>;
+      case 'bmi': return <>{renderUnitToggle()}{renderWeightInput()}{renderHeightInput()}</>;
+      case 'bodyfat': return <>{renderUnitToggle()}{renderGenderPicker()}{renderInput('Age', 'age', 'years')}{renderWeightInput()}{renderHeightInput()}</>;
+      case 'macros': return <>{renderUnitToggle()}{renderWeightInput()}{renderGoalPicker()}</>;
+      case '1rm': return <>{renderUnitToggle()}{renderWeightInput('Weight Lifted')}{renderInput('Reps Completed', 'reps')}</>;
+      case 'ideal': return <>{renderUnitToggle()}{renderGenderPicker()}{renderHeightInput()}</>;
       default: return null;
     }
   };
@@ -245,21 +340,26 @@ export default function CalculatorsScreen() {
       case '1rm': return (
         <View style={s.resultCard}>
           <Text style={s.resultTitle}>1 REP MAX</Text>
-          <Text style={s.resultBig}>{result.oneRepMax} kg</Text>
+          <Text style={s.resultBig}>{fmtWeight(result.oneRepMaxKg)}</Text>
           <View style={s.resultGrid}>
-            <ResultItem label="90%" value={`${result.pct90}kg`} />
-            <ResultItem label="80%" value={`${result.pct80}kg`} />
-            <ResultItem label="70%" value={`${result.pct70}kg`} />
+            <ResultItem label="90%" value={fmtWeightShort(result.pct90Kg)} />
+            <ResultItem label="80%" value={fmtWeightShort(result.pct80Kg)} />
+            <ResultItem label="70%" value={fmtWeightShort(result.pct70Kg)} />
           </View>
         </View>
       );
-      case 'ideal': return (
-        <View style={s.resultCard}>
-          <Text style={s.resultTitle}>IDEAL WEIGHT</Text>
-          <Text style={s.resultBig}>{result.ideal} kg</Text>
-          <Text style={s.resultUnit}>Range: {result.rangeLow} - {result.rangeHigh} kg</Text>
-        </View>
-      );
+      case 'ideal': {
+        const idealStr = fmtWeight(result.idealKg);
+        const lowStr = fmtWeight(result.rangeLowKg);
+        const highStr = fmtWeight(result.rangeHighKg);
+        return (
+          <View style={s.resultCard}>
+            <Text style={s.resultTitle}>IDEAL WEIGHT</Text>
+            <Text style={s.resultBig}>{idealStr}</Text>
+            <Text style={s.resultUnit}>Range: {lowStr} - {highStr}</Text>
+          </View>
+        );
+      }
       default: return null;
     }
   };
@@ -339,6 +439,18 @@ const s = StyleSheet.create({
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
   backText: { color: COLORS.textSecondary, fontSize: 14, fontWeight: '600' },
   calcTitle: { fontSize: 24, fontWeight: '900', color: COLORS.textPrimary, marginBottom: 20 },
+  // Unit toggle
+  unitToggleWrap: { marginBottom: 20, backgroundColor: COLORS.surface, borderRadius: 14, padding: 14, borderWidth: 1, borderColor: COLORS.border },
+  unitLabel: { fontSize: 10, fontWeight: '800', color: COLORS.textMuted, letterSpacing: 2, marginBottom: 8 },
+  unitToggleRow: { flexDirection: 'row', gap: 8 },
+  unitBtn: {
+    flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center',
+    backgroundColor: COLORS.surfaceHighlight, borderWidth: 1, borderColor: COLORS.border,
+  },
+  unitBtnActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  unitBtnText: { color: COLORS.textMuted, fontWeight: '700', fontSize: 12 },
+  unitBtnTextActive: { color: '#fff' },
+  // Inputs
   inputGroup: { marginBottom: 16 },
   inputLabel: { fontSize: 12, fontWeight: '700', color: COLORS.textSecondary, letterSpacing: 1, marginBottom: 8, textTransform: 'uppercase' },
   textInput: {
@@ -346,6 +458,9 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, color: COLORS.textPrimary, fontSize: 18, fontWeight: '700',
     borderWidth: 1, borderColor: COLORS.border,
   },
+  heightRow: { flexDirection: 'row', gap: 10 },
+  heightField: { flex: 1, position: 'relative' as const },
+  heightUnit: { position: 'absolute' as const, right: 14, top: 14, color: COLORS.textMuted, fontSize: 14, fontWeight: '600' },
   toggleRow: { flexDirection: 'row', gap: 8 },
   toggleBtn: {
     paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10,
