@@ -10,12 +10,12 @@ import { COLORS } from '../../src/utils/theme';
 type CalcType = 'tdee' | 'bmi' | 'bodyfat' | 'macros' | '1rm' | 'ideal';
 
 const CALCS: { id: CalcType; name: string; icon: string; color: string; desc: string }[] = [
-  { id: 'tdee', name: 'TDEE', icon: 'flame', color: '#FF3B30', desc: 'Total Daily Energy Expenditure' },
-  { id: 'bmi', name: 'BMI', icon: 'body', color: '#007AFF', desc: 'Body Mass Index' },
+  { id: 'tdee', name: 'TDEE', icon: 'flame', color: '#1976D2', desc: 'Total Daily Energy Expenditure' },
+  { id: 'bmi', name: 'BMI', icon: 'body', color: '#42A5F5', desc: 'Body Mass Index' },
   { id: 'bodyfat', name: 'Body Fat %', icon: 'fitness', color: '#32D74B', desc: 'Estimate body fat percentage' },
   { id: 'macros', name: 'Macros', icon: 'nutrition', color: '#FFD60A', desc: 'Macronutrient breakdown' },
-  { id: '1rm', name: '1 Rep Max', icon: 'barbell', color: '#FF453A', desc: 'Estimate your max lift' },
-  { id: 'ideal', name: 'Ideal Weight', icon: 'scale', color: '#AF52DE', desc: 'Based on height & gender' },
+  { id: '1rm', name: '1 Rep Max', icon: 'barbell', color: '#E53935', desc: 'Estimate your max lift' },
+  { id: 'ideal', name: 'Ideal Weight', icon: 'scale', color: '#90CAF9', desc: 'Based on height & gender' },
 ];
 
 const ACTIVITY_LEVELS = [
@@ -372,7 +372,7 @@ const s = StyleSheet.create({
     alignItems: 'center', borderWidth: 1, borderColor: COLORS.primary,
   },
   resultTitle: { fontSize: 12, fontWeight: '800', color: COLORS.textSecondary, letterSpacing: 2, marginBottom: 8 },
-  resultBig: { fontSize: 48, fontWeight: '900', color: COLORS.textPrimary },
+  resultBig: { fontSize: 48, fontWeight: '900', color: COLORS.primaryLight || COLORS.textPrimary },
   resultUnit: { fontSize: 14, color: COLORS.textSecondary, marginTop: 4, marginBottom: 16 },
   resultGrid: { flexDirection: 'row', gap: 16, marginTop: 8 },
   resultItem: { alignItems: 'center' },
