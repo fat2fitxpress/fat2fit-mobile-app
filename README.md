@@ -63,7 +63,7 @@ fat2fit-mobile-app/
    ```bash
    pip install -r requirements.txt
    ```
-4. Create a `.env` file based on `.env.example` (if available) or set the following:
+4. Create a `.env` file and set the following:
    ```env
    MONGO_URL=your_mongodb_uri
    DB_NAME=fat2fit_db
@@ -74,7 +74,18 @@ fat2fit-mobile-app/
    uvicorn server:app --reload
    ```
 
-### Frontend Setup
+## 🔐 Environment Variables
+
+The application requires the following environment variables to be set in the `frontend/` directory (create a `.env` file):
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `EXPO_PUBLIC_BACKEND_URL` | The base URL of your FastAPI backend | `http://10.0.2.2:8000` (for emulator) |
+
+> [!NOTE]
+> For EAS Cloud builds, add this secret via `eas secret:create --name EXPO_PUBLIC_BACKEND_URL --value <YOUR_URL>`.
+
+## 🏁 Getting Started (Frontend)
 1. Navigate to the frontend directory:
    ```bash
    cd frontend
@@ -88,6 +99,29 @@ fat2fit-mobile-app/
    npx expo start
    ```
 4. Follow the terminal instructions to open the app on an Android Emulator, iOS Simulator, or via the Expo Go app.
+
+## ⚒️ Android Build
+
+### Option 1: EAS Cloud Build
+```bash
+eas build --platform android --profile production
+```
+
+### Option 2: Local Gradle Build
+1. Ensure **JDK 17** is installed and set as `JAVA_HOME`.
+2. Generate native files: `npx expo prebuild`
+3. Configure your keystore in `android/gradle.properties`.
+4. Run build:
+   ```bash
+   cd android
+   ./gradlew assembleRelease
+   ```
+
+## 🛠️ Troubleshooting
+
+- **JDK Version Error**: If you see `Unsupported class file major version`, ensure you are using **JDK 17**.
+- **SDK Not Found**: Create a `frontend/android/local.properties` file with: `sdk.dir=C\:\\Users\\<USER>\\AppData\\Local\\Android\\Sdk`
+- **GitHub Account Switching**: Use `git config --local user.name "Name"` and `git config --local user.email "email"` to set a project-specific identity.
 
 ## 🧪 Testing
 
