@@ -17,7 +17,7 @@ def load_backend_url():
             for line in f:
                 if line.startswith('EXPO_PUBLIC_BACKEND_URL='):
                     return line.split('=', 1)[1].strip().rstrip('/')
-    return 'https://fitness-calc-hub-2.preview.emergentagent.com'
+    return 'http://localhost:8000'
 
 BASE_URL = load_backend_url()
 

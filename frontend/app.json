@@ -21,16 +21,16 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0A0A0A"
       },
-      "androidStatusBar": {
-        "backgroundColor": "#000000",
-        "barStyle": "light-content"
-      },
       "edgeToEdgeEnabled": true,
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
       ]
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#000000",
+      "barStyle": "light-content"
     },
     "web": {
       "bundler": "metro",

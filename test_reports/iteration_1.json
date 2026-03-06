@@ -41,7 +41,7 @@
   "seed_data_creation": "No additional seed data created. Existing test user (test@fat2fit.com) and 3 workout plans (Beginner, Intermediate, Advanced) are working correctly",
   "retest_needed": false,
   "should_main_agent_self_test": false,
-  "context_for_next_testing_agent": "All features tested and working. Backend has comprehensive pytest suite with 21 tests covering auth, dashboard, workout plans, weight tracking, water intake, workout logs, progress photos, and profile. Frontend tested with Playwright covering auth flow, dashboard interactions, all 6 calculators (TDEE, BMI, Body Fat %, Macros, 1RM, Ideal Weight), workout plan navigation, progress tracking (weight/water/photos tabs), and profile editing. Test user: test@fat2fit.com / test123456. Public URL: https://fitness-calc-hub-2.preview.emergentagent.com",
+  "context_for_next_testing_agent": "All features tested and working. Backend has comprehensive pytest suite with 21 tests covering auth, dashboard, workout plans, weight tracking, water intake, workout logs, progress photos, and profile. Frontend tested with Playwright covering auth flow, dashboard interactions, all 6 calculators (TDEE, BMI, Body Fat %, Macros, 1RM, Ideal Weight), workout plan navigation, progress tracking (weight/water/photos tabs), and profile editing. Test user: test@fat2fit.com / test123456. Public URL: https://fat2fit.up.railway.app",
   "features_tested": {
     "backend_apis": [
       "POST /api/auth/signup - user registration",
@@ -89,7 +89,7 @@
     ]
   },
   "test_environment": {
-    "frontend_url": "https://fitness-calc-hub-2.preview.emergentagent.com",
+    "frontend_url": "https://fat2fit.up.railway.app",
     "backend_internal": "localhost:8001",
     "test_user": "test@fat2fit.com / test123456",
     "database": "MongoDB",
