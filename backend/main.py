@@ -38,8 +38,49 @@ s3_client = boto3.client(
     aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
 )
 
+from fastapi.responses import HTMLResponse
+
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_policy():
+    return """
+    <html>
+        <head>
+            <title>Fat2FitXpress - Privacy Policy</title>
+            <style>
+                body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 20px; color: #333; }
+                h1 { color: #000; }
+                h2 { margin-top: 30px; }
+            </style>
+        </head>
+        <body>
+            <h1>Privacy Policy</h1>
+            <p>Last updated: March 06, 2026</p>
+            <p>Fat2FitXpress ("we", "us", or "our") operates the Fat2FitXpress mobile application. This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service.</p>
+            
+            <h2>Information Collection and Use</h2>
+            <p>We collect several different types of information for various purposes to provide and improve our Service to you:</p>
+            <ul>
+                <li><strong>Personal Data:</strong> Email address, name, height, weight, and fitness goals.</li>
+                <li><strong>User Content:</strong> Progress photos that you explicitly choose to upload to track your fitness journey.</li>
+            </ul>
+
+            <h2>Data Storage</h2>
+            <p>Your personal data is stored securely in our database. Progress photos are stored in secure cloud storage (AWS S3).</p>
+
+            <h2>Permissions</h2>
+            <p>Our app requires access to your physical activity (to track workouts) and your camera/photo library (to allow you to upload progress photos).</p>
+
+            <h2>Changes to This Privacy Policy</h2>
+            <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+
+            <h2>Contact Us</h2>
+            <p>If you have any questions about this Privacy Policy, please contact us.</p>
+        </body>
+    </html>
+    """
 
 # --- Models ---
 class UserCreate(BaseModel):

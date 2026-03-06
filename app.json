@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "8699883a-07da-4a1c-8417-4a854f643bee"
+      }
+    },
+    "android": {
+      "package": "com.fat2fit.fat2fitmobileapp"
+    }
+  }
+}

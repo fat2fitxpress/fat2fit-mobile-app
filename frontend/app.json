@@ -55,8 +55,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "797fc881-c72f-4d61-9b84-9f06fa713a74"
+        "projectId": "9db81236-8f8e-429f-b65e-d59ff67f9a67"
       }
-    }
+    },
+    "owner": "fat2fit"
   }
 }
