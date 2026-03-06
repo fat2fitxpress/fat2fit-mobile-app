@@ -1,9 +1,13 @@
 import os
 import asyncio
 import boto3
+from pathlib import Path
 from botocore.exceptions import ClientError
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
+
+# Explicitly load .env from the same directory as this script
+load_dotenv(Path(__file__).parent / '.env')
 
 async def cleanup_database():
     """
@@ -11,7 +15,6 @@ async def cleanup_database():
     AND deletes the corresponding objects from S3.
     Run this locally after setting your env vars in a .env file.
     """
-    load_dotenv()
     mongo_url = os.environ.get('MONGO_URL')
     db_name = os.environ.get('DB_NAME', 'fat2fitxpress')
     aws_region = os.environ.get('AWS_REGION', 'us-east-1')
