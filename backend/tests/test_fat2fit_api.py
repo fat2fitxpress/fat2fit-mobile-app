@@ -357,26 +357,31 @@ class TestProgressPhotos:
         photos = list_response.json()
         assert any(p["id"] == photo_id for p in photos)
     
-    def test_get_single_photo_with_base64(self, auth_token):
-        """Test getting single photo includes base64 data"""
+    def test_get_single_photo_with_url(self, auth_token):
+        """Test getting single photo returns an S3 photo_url (not raw base64)"""
         today = datetime.now().strftime("%Y-%m-%d")
-        fake_base64 = "data:image/jpeg;base64,TESTDATA123"
+        fake_base64 = "data:image/jpeg;base64,/9j/4AAQSkZJRg=="
         
-        # Create photo
+        # Create photo (still accepts base64 on upload)
         create_response = requests.post(f"{BASE_URL}/api/progress-photos",
             headers={"Authorization": f"Bearer {auth_token}"},
             json={"photo_base64": fake_base64, "date": today, "note": ""}
         )
-        photo_id = create_response.json()["id"]
+        assert create_response.status_code == 200
+        created = create_response.json()
+        photo_id = created["id"]
+        assert "photo_url" in created, "Create response should include photo_url"
+        assert created["photo_url"].startswith("https://"), "photo_url should be an S3 HTTPS URL"
         
-        # Get single photo
+        # Get single photo — should return photo_url, NOT raw base64
         response = requests.get(f"{BASE_URL}/api/progress-photos/{photo_id}",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
         assert response.status_code == 200
         photo = response.json()
-        assert "photo_base64" in photo
-        assert photo["photo_base64"] == fake_base64
+        assert "photo_url" in photo, "Response should contain photo_url"
+        assert "photo_base64" not in photo, "Raw base64 should never be returned"
+        assert photo["photo_url"].startswith("https://"), "photo_url should be an S3 HTTPS URL"
     
     def test_delete_progress_photo(self, auth_token):
         """Test deleting progress photo"""

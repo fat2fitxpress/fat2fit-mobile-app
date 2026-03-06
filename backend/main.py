@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import base64
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional
@@ -12,6 +13,8 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import jwt
 import bcrypt
+import boto3
+from botocore.exceptions import ClientError
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -24,6 +27,16 @@ SECRET_KEY = os.environ.get('JWT_SECRET', 'f2f_xpress_jwt_secret_key_prod_2024!'
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 72
 security = HTTPBearer()
+
+# --- S3 Config ---
+AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+AWS_S3_BUCKET = os.environ.get('AWS_S3_BUCKET_NAME', '')
+s3_client = boto3.client(
+    's3',
+    region_name=AWS_REGION,
+    aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
+)
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -60,9 +73,43 @@ class WorkoutLogCreate(BaseModel):
     exercises: List[dict]
 
 class ProgressPhotoCreate(BaseModel):
-    photo_base64: str
+    photo_base64: str  # full data URI, e.g. "data:image/jpeg;base64,..."
     date: str
     note: Optional[str] = ""
+
+# --- S3 Helpers ---
+def upload_photo_to_s3(photo_base64: str, photo_id: str) -> str:
+    """Decode base64 image and upload to S3. Returns the public HTTPS URL."""
+    # Strip data URI prefix if present: "data:image/jpeg;base64,<data>"
+    if ',' in photo_base64:
+        header, data = photo_base64.split(',', 1)
+        content_type = header.split(':')[1].split(';')[0]  # e.g. "image/jpeg"
+    else:
+        data = photo_base64
+        content_type = 'image/jpeg'
+
+    image_bytes = base64.b64decode(data)
+    ext = content_type.split('/')[-1]  # e.g. "jpeg", "png"
+    key = f"progress-photos/{photo_id}.{ext}"
+
+    s3_client.put_object(
+        Bucket=AWS_S3_BUCKET,
+        Key=key,
+        Body=image_bytes,
+        ContentType=content_type,
+    )
+    return f"https://{AWS_S3_BUCKET}.s3.{AWS_REGION}.amazonaws.com/{key}"
+
+def delete_photo_from_s3(photo_url: str):
+    """Delete a photo from S3 given its full URL. Silently ignores errors."""
+    try:
+        # Extract the S3 key from the URL
+        prefix = f"https://{AWS_S3_BUCKET}.s3.{AWS_REGION}.amazonaws.com/"
+        if photo_url.startswith(prefix):
+            key = photo_url[len(prefix):]
+            s3_client.delete_object(Bucket=AWS_S3_BUCKET, Key=key)
+    except ClientError as e:
+        logging.getLogger(__name__).warning(f"S3 delete failed for {photo_url}: {e}")
 
 # --- Auth Helpers ---
 def hash_password(password: str) -> str:
@@ -238,6 +285,7 @@ async def create_workout_log(data: WorkoutLogCreate, user_id: str = Depends(get_
 # --- Progress Photos ---
 @api_router.get("/progress-photos")
 async def get_progress_photos(user_id: str = Depends(get_current_user)):
+    # Exclude the legacy photo_base64 field entirely; new docs use photo_url
     photos = await db.progress_photos.find(
         {"user_id": user_id}, {"_id": 0, "photo_base64": 0}
     ).sort("date", -1).to_list(100)
@@ -245,7 +293,10 @@ async def get_progress_photos(user_id: str = Depends(get_current_user)):
 
 @api_router.get("/progress-photos/{photo_id}")
 async def get_progress_photo(photo_id: str, user_id: str = Depends(get_current_user)):
-    photo = await db.progress_photos.find_one({"id": photo_id, "user_id": user_id}, {"_id": 0})
+    photo = await db.progress_photos.find_one(
+        {"id": photo_id, "user_id": user_id},
+        {"_id": 0, "photo_base64": 0}  # never return raw base64
+    )
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
     return photo
@@ -254,18 +305,37 @@ async def get_progress_photo(photo_id: str, user_id: str = Depends(get_current_u
 async def create_progress_photo(data: ProgressPhotoCreate, user_id: str = Depends(get_current_user)):
     photo_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
+
+    if not AWS_S3_BUCKET:
+        raise HTTPException(status_code=500, detail="S3 bucket not configured")
+
+    try:
+        photo_url = upload_photo_to_s3(data.photo_base64, photo_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload photo: {str(e)}")
+
     photo_doc = {
-        "id": photo_id, "user_id": user_id, "date": data.date,
-        "photo_base64": data.photo_base64, "note": data.note or "", "created_at": now
+        "id": photo_id,
+        "user_id": user_id,
+        "date": data.date,
+        "photo_url": photo_url,  # S3 URL instead of base64 blob
+        "note": data.note or "",
+        "created_at": now,
     }
     await db.progress_photos.insert_one(photo_doc)
-    return {"id": photo_id, "date": data.date, "note": data.note or "", "created_at": now, "has_photo": True}
+    return {"id": photo_id, "date": data.date, "note": data.note or "", "created_at": now, "has_photo": True, "photo_url": photo_url}
 
 @api_router.delete("/progress-photos/{photo_id}")
 async def delete_progress_photo(photo_id: str, user_id: str = Depends(get_current_user)):
-    result = await db.progress_photos.delete_one({"id": photo_id, "user_id": user_id})
-    if result.deleted_count == 0:
+    photo = await db.progress_photos.find_one({"id": photo_id, "user_id": user_id}, {"_id": 0})
+    if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
+
+    # Delete from S3 first
+    if photo.get("photo_url"):
+        delete_photo_from_s3(photo["photo_url"])
+
+    await db.progress_photos.delete_one({"id": photo_id, "user_id": user_id})
     return {"status": "deleted"}
 
 # --- Dashboard ---
