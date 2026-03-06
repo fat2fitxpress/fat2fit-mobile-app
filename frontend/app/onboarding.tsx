@@ -298,7 +298,7 @@ export default function OnboardingScreen() {
             <View>
               <View style={s.resultHeader}>
                 <Image
-                  source={require('../assets/images/f2f_icon.png')}
+                  source={require('../assets/images/icon.png')}
                   style={s.resultLogo}
                   resizeMode="contain"
                 />

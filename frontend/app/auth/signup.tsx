@@ -48,7 +48,7 @@ export default function SignupScreen() {
             </TouchableOpacity>
             <View style={styles.signupLogoRow}>
               <Image
-                source={require('../../assets/images/f2f_icon.png')}
+                source={require('../../assets/images/icon.png')}
                 style={styles.signupLogo}
                 resizeMode="contain"
               />
