@@ -1,9 +1,9 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 export async function apiCall(endpoint: string, options: RequestInit = {}) {
-  const token = await AsyncStorage.getItem('auth_token');
+  const token = await SecureStore.getItemAsync('auth_token');
 
   if (!BASE_URL) {
     console.error('API Error: EXPO_PUBLIC_BACKEND_URL is not defined in environment.');

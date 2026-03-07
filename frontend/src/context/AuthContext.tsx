@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { apiCall } from '../utils/api';
 
 export interface User {
@@ -41,13 +41,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function checkAuth() {
     try {
-      const token = await AsyncStorage.getItem('auth_token');
+      const token = await SecureStore.getItemAsync('auth_token');
       if (token) {
         const userData = await apiCall('/auth/me');
         setUser(userData);
       }
     } catch {
-      await AsyncStorage.removeItem('auth_token');
+      await SecureStore.deleteItemAsync('auth_token');
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    await AsyncStorage.setItem('auth_token', data.token);
+    await SecureStore.setItemAsync('auth_token', data.token);
     setUser(data.user);
   }
 
@@ -67,12 +67,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
     });
-    await AsyncStorage.setItem('auth_token', data.token);
+    await SecureStore.setItemAsync('auth_token', data.token);
     setUser(data.user);
   }
 
   async function logout() {
-    await AsyncStorage.removeItem('auth_token');
+    await SecureStore.deleteItemAsync('auth_token');
     setUser(null);
   }
 
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const userData = await apiCall('/auth/me');
       setUser(userData);
-    } catch {}
+    } catch { }
   }
 
   const profileComplete = isProfileComplete(user);

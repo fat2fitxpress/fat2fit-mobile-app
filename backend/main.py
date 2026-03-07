@@ -23,7 +23,10 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-SECRET_KEY = os.environ.get('JWT_SECRET', 'f2f_xpress_jwt_secret_key_prod_2024!')
+SECRET_KEY = os.environ.get('JWT_SECRET')
+if not SECRET_KEY:
+    raise RuntimeError("JWT_SECRET environment variable is not set")
+
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 72
 security = HTTPBearer()
@@ -140,6 +143,26 @@ def upload_photo_to_s3(photo_base64: str, photo_id: str) -> str:
         ContentType=content_type,
     )
     return f"https://{AWS_S3_BUCKET}.s3.{AWS_REGION}.amazonaws.com/{key}"
+
+def generate_s3_presigned_url(photo_url: str, expires_in: int = 3600) -> Optional[str]:
+    """Generate a presigned URL for an S3 object. Returns the URL or None on failure."""
+    if not photo_url or not photo_url.startswith("https://"):
+        return None
+    try:
+        # Extract bucket and key from the URL
+        # Format: https://{bucket}.s3.{region}.amazonaws.com/{key}
+        parts = photo_url.split('/')
+        bucket = parts[2].split('.')[0]
+        key = '/'.join(parts[3:])
+        
+        return s3_client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': bucket, 'Key': key},
+            ExpiresIn=expires_in
+        )
+    except Exception as e:
+        logger.warning(f"Failed to generate presigned URL for {photo_url}: {e}")
+        return photo_url  # Fallback to public URL if signing fails
 
 def delete_photo_from_s3(photo_url: str):
     """Delete a photo from S3 given its full URL. Silently ignores errors."""
@@ -330,6 +353,12 @@ async def get_progress_photos(user_id: str = Depends(get_current_user)):
     photos = await db.progress_photos.find(
         {"user_id": user_id}, {"_id": 0, "photo_base64": 0}
     ).sort("date", -1).to_list(100)
+    
+    # Generate signed URLs for all photos
+    for p in photos:
+        if p.get("photo_url"):
+            p["photo_url"] = generate_s3_presigned_url(p["photo_url"])
+            
     return photos
 
 @api_router.get("/progress-photos/{photo_id}")
@@ -340,6 +369,10 @@ async def get_progress_photo(photo_id: str, user_id: str = Depends(get_current_u
     )
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
+    
+    if photo.get("photo_url"):
+        photo["photo_url"] = generate_s3_presigned_url(photo["photo_url"])
+        
     return photo
 
 @api_router.post("/progress-photos")
@@ -403,7 +436,8 @@ app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware, allow_credentials=True,
-    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
+    allow_origins=os.environ.get('ALLOWED_ORIGINS', 'http://localhost:8081,http://10.0.2.2:8000').split(','),
+    allow_methods=["*"], allow_headers=["*"],
 )
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
