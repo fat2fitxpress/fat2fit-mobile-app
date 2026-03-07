@@ -53,10 +53,12 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: async () => {
-        await logout();
-        router.replace('/auth/login');
-      }},
+      {
+        text: 'Logout', style: 'destructive', onPress: async () => {
+          await logout();
+          router.replace('/auth/login');
+        }
+      },
     ]);
   };
 
@@ -66,9 +68,9 @@ export default function ProfileScreen() {
   const GENDERS = ['male', 'female'];
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView style={s.scroll} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+        <ScrollView style={s.scroll} contentContainerStyle={[s.content, { paddingBottom: 100 }]} keyboardShouldPersistTaps="handled">
           <View style={s.header}>
             <View style={s.avatar}>
               <Text style={s.avatarText}>{initials}</Text>

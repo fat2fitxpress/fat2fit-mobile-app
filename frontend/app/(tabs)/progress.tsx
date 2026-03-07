@@ -15,7 +15,7 @@ export default function ProgressScreen() {
   const [tab, setTab] = useState<Tab>('weight');
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
       <View style={s.tabBar}>
         {(['weight', 'water', 'photos'] as Tab[]).map(t => (
           <TouchableOpacity
@@ -51,7 +51,7 @@ function WeightTab() {
     try {
       const data = await apiCall('/weight-entries');
       setEntries(data);
-    } catch {} finally { setLoading(false); }
+    } catch { } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetch_(); }, [fetch_]);
@@ -77,7 +77,7 @@ function WeightTab() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-      <ScrollView style={s.scroll} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      <ScrollView style={s.scroll} contentContainerStyle={[s.content, { paddingBottom: 100 }]} keyboardShouldPersistTaps="handled">
         <View style={s.logRow}>
           <TextInput
             testID="weight-input"
@@ -126,7 +126,7 @@ function WeightTab() {
               <Text style={s.entryDate}>{e.date}</Text>
             </View>
             <TouchableOpacity testID={`delete-weight-${i}`} onPress={async () => {
-              try { await apiCall(`/weight-entries/${e.id}`, { method: 'DELETE' }); fetch_(); } catch {}
+              try { await apiCall(`/weight-entries/${e.id}`, { method: 'DELETE' }); fetch_(); } catch { }
             }}>
               <Ionicons name="trash-outline" size={18} color={COLORS.error} />
             </TouchableOpacity>
@@ -146,7 +146,7 @@ function WaterTab() {
     try {
       const data = await apiCall(`/water-intake?date=${today}`);
       setWater(data);
-    } catch {} finally { setLoading(false); }
+    } catch { } finally { setLoading(false); }
   }, [today]);
 
   useEffect(() => { fetch_(); }, [fetch_]);
@@ -155,14 +155,14 @@ function WaterTab() {
     try {
       const data = await apiCall('/water-intake/add', { method: 'POST', body: JSON.stringify({ date: today }) });
       setWater(data);
-    } catch {}
+    } catch { }
   };
 
   const removeGlass = async () => {
     try {
       const data = await apiCall('/water-intake/remove', { method: 'POST', body: JSON.stringify({ date: today }) });
       setWater(data);
-    } catch {}
+    } catch { }
   };
 
   if (loading) return <View style={s.center}><ActivityIndicator size="large" color={COLORS.secondary} /></View>;
@@ -171,7 +171,7 @@ function WaterTab() {
   const glasses = Array.from({ length: water.goal }, (_, i) => i < water.glasses);
 
   return (
-    <ScrollView style={s.scroll} contentContainerStyle={[s.content, { alignItems: 'center' }]}>
+    <ScrollView style={s.scroll} contentContainerStyle={[s.content, { alignItems: 'center', paddingBottom: 100 }]}>
       <Text style={[s.sectionTitle, { alignSelf: 'flex-start' }]}>TODAY'S WATER INTAKE</Text>
 
       <View style={s.waterCircle}>
@@ -216,7 +216,7 @@ function PhotosTab() {
     try {
       const data = await apiCall('/progress-photos');
       setPhotos(data);
-    } catch {} finally { setLoading(false); }
+    } catch { } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetch_(); }, [fetch_]);
@@ -285,7 +285,7 @@ function PhotosTab() {
   if (loading) return <View style={s.center}><ActivityIndicator size="large" color={COLORS.primary} /></View>;
 
   return (
-    <ScrollView style={s.scroll} contentContainerStyle={s.content}>
+    <ScrollView style={s.scroll} contentContainerStyle={[s.content, { paddingBottom: 100 }]}>
       <Text style={s.sectionTitle}>PROGRESS PHOTOS</Text>
 
       <View style={s.photoActions}>
@@ -316,7 +316,7 @@ function PhotosTab() {
         <View style={s.photoGrid}>
           {photos.map((photo, i) => (
             <PhotoCard key={i} photo={photo} onDelete={() => {
-              apiCall(`/progress-photos/${photo.id}`, { method: 'DELETE' }).then(fetch_).catch(() => {});
+              apiCall(`/progress-photos/${photo.id}`, { method: 'DELETE' }).then(fetch_).catch(() => { });
             }} />
           ))}
         </View>
@@ -332,7 +332,7 @@ function PhotoCard({ photo, onDelete }: { photo: any; onDelete: () => void }) {
   useEffect(() => {
     apiCall(`/progress-photos/${photo.id}`)
       .then(data => { if (data.photo_base64) setImageData(data.photo_base64); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingImg(false));
   }, [photo.id]);
 

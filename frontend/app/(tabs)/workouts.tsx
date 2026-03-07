@@ -35,7 +35,7 @@ export default function WorkoutsScreen() {
     try {
       const data = await apiCall('/workout-logs');
       setLogs(data);
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => { fetchPlans(); fetchLogs(); }, [fetchPlans, fetchLogs]);
@@ -96,8 +96,8 @@ export default function WorkoutsScreen() {
   // History View
   if (view === 'history') {
     return (
-      <SafeAreaView style={s.safe}>
-        <ScrollView style={s.scroll} contentContainerStyle={s.content}>
+      <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
+        <ScrollView style={s.scroll} contentContainerStyle={[s.content, { paddingBottom: 100 }]}>
           <TouchableOpacity testID="history-back-btn" style={s.backBtn} onPress={() => setView('plans')}>
             <Ionicons name="arrow-back" size={20} color={COLORS.textPrimary} />
             <Text style={s.backText}>Back</Text>
@@ -123,9 +123,9 @@ export default function WorkoutsScreen() {
   // Log View
   if (view === 'log' && selectedDay) {
     return (
-      <SafeAreaView style={s.safe}>
+      <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <ScrollView style={s.scroll} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+          <ScrollView style={s.scroll} contentContainerStyle={[s.content, { paddingBottom: 100 }]} keyboardShouldPersistTaps="handled">
             <TouchableOpacity testID="log-back-btn" style={s.backBtn} onPress={() => setView('detail')}>
               <Ionicons name="arrow-back" size={20} color={COLORS.textPrimary} />
               <Text style={s.backText}>Back</Text>
@@ -183,8 +183,8 @@ export default function WorkoutsScreen() {
   // Detail View
   if (view === 'detail' && selectedPlan) {
     return (
-      <SafeAreaView style={s.safe}>
-        <ScrollView style={s.scroll} contentContainerStyle={s.content}>
+      <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
+        <ScrollView style={s.scroll} contentContainerStyle={[s.content, { paddingBottom: 100 }]}>
           <TouchableOpacity testID="detail-back-btn" style={s.backBtn} onPress={() => setView('plans')}>
             <Ionicons name="arrow-back" size={20} color={COLORS.textPrimary} />
             <Text style={s.backText}>All Plans</Text>
@@ -233,8 +233,8 @@ export default function WorkoutsScreen() {
 
   // Plans View
   return (
-    <SafeAreaView style={s.safe}>
-      <ScrollView style={s.scroll} contentContainerStyle={s.content}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
+      <ScrollView style={s.scroll} contentContainerStyle={[s.content, { paddingBottom: 100 }]}>
         <View style={s.topRow}>
           <Text style={s.pageTitle}>WORKOUT PLANS</Text>
           <TouchableOpacity testID="view-history-btn" style={s.histBtn} onPress={() => { fetchLogs(); setView('history'); }}>

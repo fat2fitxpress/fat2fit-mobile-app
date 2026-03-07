@@ -13,6 +13,9 @@ This is the mobile frontend of the Fat2FitXpress application, built with **React
    Create a `.env` file in this directory and add:
    ```env
    EXPO_PUBLIC_BACKEND_URL=your_backend_url
+   EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID=your_google_android_id
+   EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS=your_google_ios_id
+   EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB=your_google_web_id (Used for Expo Go)
    ```
 
 3. **Start the App**:
@@ -36,12 +39,15 @@ We support both EAS Cloud and Local Gradle builds.
 
 For detailed build and signing instructions, please refer to the **[Main Project README](../README.md)**.
 
+## 🧪 Testing
+For detailed instructions on local development and environment setup, see **[local_testing_guide.md](../local_testing_guide.md)**.
+
 ## 📂 Architecture
 
-- `app/`: Expo Router screens and file-based navigation.
+- `app/`: Expo Router screens and file-based navigation (including Tabs).
 - `src/components/`: Reusable UI components.
-- `src/utils/`: API wrappers and helper functions.
-- `src/context/`: Authentication and Global state management.
+- `src/utils/`: API wrappers (`api.ts` uses `SecureStore` for token security).
+- `src/context/`: Authentication (`AuthContext.tsx` handles Email and Google OIDC).
 
 ---
 Built with ❤️ by Shailendra Yadav

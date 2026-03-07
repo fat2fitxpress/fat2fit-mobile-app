@@ -15,6 +15,8 @@ import jwt
 import bcrypt
 import boto3
 from botocore.exceptions import ClientError
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -94,6 +96,9 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class GoogleLogin(BaseModel):
+    id_token: str
 
 class ProfileUpdate(BaseModel):
     name: Optional[str] = None
@@ -235,6 +240,51 @@ async def login(data: UserLogin):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = create_token(user["id"])
     return {"token": token, "user": user_response(user)}
+
+@api_router.post("/auth/google")
+async def google_login(data: GoogleLogin):
+    try:
+        # Load Client IDs from env for audience verification
+        env_ids = os.environ.get("GOOGLE_CLIENT_IDS", "")
+        client_ids = [cid.strip() for cid in env_ids.split(",") if cid.strip()]
+        
+        # Verify the ID token with optional audience check
+        id_info = id_token.verify_oauth2_token(
+            data.id_token, 
+            google_requests.Request(),
+            audience=client_ids if client_ids else None
+        )
+
+        email = id_info.get("email")
+        name = id_info.get("name")
+        if not email:
+            raise HTTPException(status_code=400, detail="Invalid Google token (no email)")
+
+        user = await db.users.find_one({"email": email}, {"_id": 0})
+        
+        if not user:
+            # Create a new user if they don't exist
+            user_id = str(uuid.uuid4())
+            now = datetime.now(timezone.utc).isoformat()
+            user = {
+                "id": user_id, 
+                "name": name or "Athlete", 
+                "email": email,
+                "password_hash": "", # No password for Google users
+                "height_cm": None, "weight_kg": None, "age": None,
+                "gender": None, "goal": None, "created_at": now
+            }
+            await db.users.insert_one(user.copy())
+        
+        token = create_token(user["id"])
+        return {"token": token, "user": user_response(user)}
+
+    except ValueError:
+        # Invalid token
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+    except Exception as e:
+        logger.error(f"Google login error: {e}")
+        raise HTTPException(status_code=500, detail="Google authentication failed")
 
 @api_router.get("/auth/me")
 async def get_me(user_id: str = Depends(get_current_user)):

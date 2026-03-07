@@ -10,14 +10,16 @@ export default function TabLayout() {
   return (
     <Tabs screenOptions={{
       headerShown: false,
+      tabBarHideOnKeyboard: true,
       tabBarStyle: {
         backgroundColor: COLORS.surface,
         borderTopColor: COLORS.border,
         borderTopWidth: 1,
-        // More generous padding for iOS as requested
-        paddingBottom: Platform.OS === 'ios' ? insets.bottom + 12 : (insets.bottom > 0 ? insets.bottom : 10) + 8,
+        // Refined padding for premium feel and safe area handling
+        paddingBottom: Platform.OS === 'ios' ? insets.bottom + 12 : (insets.bottom > 0 ? insets.bottom + 8 : 12),
         paddingTop: 12,
-        height: Platform.OS === 'ios' ? insets.bottom + 70 : 64 + (insets.bottom > 0 ? insets.bottom : 0) + 8,
+        height: Platform.OS === 'ios' ? insets.bottom + 74 : 72 + (insets.bottom > 0 ? insets.bottom : 0),
+        elevation: 0,
       },
       tabBarActiveTintColor: COLORS.primary,
       tabBarInactiveTintColor: COLORS.textMuted,

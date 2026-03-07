@@ -8,14 +8,43 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/context/AuthContext';
 import { COLORS } from '../../src/utils/theme';
 import { Ionicons } from '@expo/vector-icons';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const router = useRouter();
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,
+  });
+
+  React.useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      handleGoogleLogin(id_token);
+    }
+  }, [response]);
+
+  async function handleGoogleLogin(idToken: string) {
+    setLoading(true);
+    try {
+      await googleLogin(idToken);
+      router.replace('/');
+    } catch (err: any) {
+      Alert.alert('Google Login Failed', err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
@@ -87,6 +116,22 @@ export default function LoginScreen() {
               {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>LOGIN</Text>}
             </TouchableOpacity>
 
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              testID="google-login-btn"
+              style={styles.googleBtn}
+              onPress={() => promptAsync()}
+              disabled={!request || loading}
+            >
+              <Ionicons name="logo-google" size={20} color={COLORS.textPrimary} />
+              <Text style={styles.googleBtnText}>CONTINUE WITH GOOGLE</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => router.push('/auth/signup')} testID="go-to-signup-btn" style={styles.linkBtn}>
               <Text style={styles.linkText}>
                 Don't have an account? <Text style={styles.linkHL}>Sign Up</Text>
@@ -121,4 +166,13 @@ const styles = StyleSheet.create({
   linkBtn: { alignItems: 'center', marginTop: 16 },
   linkText: { color: COLORS.textSecondary, fontSize: 14 },
   linkHL: { color: COLORS.primary, fontWeight: '700' },
+  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.border },
+  dividerText: { color: COLORS.textMuted, paddingHorizontal: 16, fontSize: 12, fontWeight: '700' },
+  googleBtn: {
+    flexDirection: 'row', backgroundColor: COLORS.surface, height: 52, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center', gap: 12,
+    borderWidth: 1, borderColor: COLORS.border,
+  },
+  googleBtnText: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700', letterSpacing: 1 },
 });

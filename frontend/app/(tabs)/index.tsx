@@ -58,10 +58,10 @@ export default function DashboardScreen() {
   const waterPct = data ? Math.min((data.water.glasses / data.water.goal) * 100, 100) : 0;
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
       <ScrollView
         style={s.scroll}
-        contentContainerStyle={s.content}
+        contentContainerStyle={[s.content, { paddingBottom: 100 }]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
       >
         <View style={s.header}>
@@ -108,7 +108,7 @@ export default function DashboardScreen() {
                 try {
                   await apiCall('/water-intake/add', { method: 'POST', body: JSON.stringify({ date: data?.today }) });
                   fetchDashboard();
-                } catch {}
+                } catch { }
               }}
             >
               <Ionicons name="add-circle" size={28} color={COLORS.secondary} />
@@ -121,7 +121,7 @@ export default function DashboardScreen() {
                 try {
                   await apiCall('/water-intake/remove', { method: 'POST', body: JSON.stringify({ date: data?.today }) });
                   fetchDashboard();
-                } catch {}
+                } catch { }
               }}
             >
               <Ionicons name="remove-circle" size={28} color={COLORS.textMuted} />

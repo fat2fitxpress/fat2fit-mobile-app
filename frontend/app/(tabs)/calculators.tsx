@@ -365,9 +365,9 @@ export default function CalculatorsScreen() {
   };
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView style={s.scroll} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+        <ScrollView style={s.scroll} contentContainerStyle={[s.content, { paddingBottom: 100 }]} keyboardShouldPersistTaps="handled">
           <Text style={s.pageTitle}>FITNESS CALCULATORS</Text>
 
           {!selected ? (

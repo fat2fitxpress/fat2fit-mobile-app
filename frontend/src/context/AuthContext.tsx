@@ -26,6 +26,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  googleLogin: (idToken: string) => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -76,6 +77,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }
 
+  async function googleLogin(idToken: string) {
+    const data = await apiCall('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    await SecureStore.setItemAsync('auth_token', data.token);
+    setUser(data.user);
+  }
+
   async function refreshUser() {
     try {
       const userData = await apiCall('/auth/me');
@@ -86,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const profileComplete = isProfileComplete(user);
 
   return (
-    <AuthContext.Provider value={{ user, loading, profileComplete, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, profileComplete, login, signup, logout, googleLogin, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
