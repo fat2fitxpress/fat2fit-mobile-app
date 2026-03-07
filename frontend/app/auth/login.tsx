@@ -25,6 +25,8 @@ export default function LoginScreen() {
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,
+  }, {
+    scheme: 'fat2fitxpress',
   });
 
   React.useEffect(() => {
